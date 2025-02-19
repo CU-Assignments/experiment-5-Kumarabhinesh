@@ -1,0 +1,134 @@
+Hard Level:
+Create a menu-based Java application with the following options. 1.Add an Employee 2. Display All 3. Exit If option 1 is selected, the application 
+should gather details of the employee like employee name, employee id, designation and salary and store it in a file. If option 2 
+is selected, the application should display all the employee details. If option 3 is selected the application should exit.
+
+CODE:
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Employee implements Serializable {
+    private static final long serialVersionUID = 1L; 
+    private String name;
+    private int id;
+    private String designation;
+    private double salary;
+
+    public Employee(String name, int id, String designation, double salary) {
+        this.name = name;
+        this.id = id;
+        this.designation = designation;
+        this.salary = salary;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", Designation: " + designation + ", Salary: " + salary;
+    }
+}
+
+public class EmployeeManagement {
+
+    private static final String FILE_NAME = "employees.dat";
+
+    public static void addEmployee() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Employee Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter Employee ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        System.out.print("Enter Designation: ");
+        String designation = scanner.nextLine();
+        System.out.print("Enter Salary: ");
+        double salary = scanner.nextDouble();
+
+        Employee employee = new Employee(name, id, designation, salary);
+        saveEmployeeToFile(employee);
+        System.out.println("Employee added successfully!");
+    }
+
+    private static void saveEmployeeToFile(Employee employee) {
+        List<Employee> employees = readEmployeesFromFile();
+        employees.add(employee);
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(employees);
+        } catch (IOException e) {
+            System.out.println("Error saving employee: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Employee> readEmployeesFromFile() {
+        List<Employee> employees = new ArrayList<>();
+        File file = new File(FILE_NAME);
+        if (file.exists()) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+                employees = (List<Employee>) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Error reading employees: " + e.getMessage());
+            }
+        }
+        return employees;
+    }
+
+    public static void displayAllEmployees() {
+        List<Employee> employees = readEmployeesFromFile();
+        if (employees.isEmpty()) {
+            System.out.println("No employees found.");
+        } else {
+            System.out.println("Employee Details:");
+            for (Employee employee : employees) {
+                System.out.println(employee);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+
+        do {
+            System.out.println("\nEmployee Management System");
+            System.out.println("1. Add an Employee");
+            System.out.println("2. Display All Employees");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    addEmployee();
+                    break;
+                case 2:
+                    displayAllEmployees();
+                    break;
+                case 3:
+                    System.out.println("Exiting the application. Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        } while (choice != 3);
+
+        scanner.close();
+    }
+}
